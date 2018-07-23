@@ -1,0 +1,107 @@
+{
+	"variables": [],
+	"info": {
+		"name": "movement-tracker",
+		"_postman_id": "ecc2a134-e33e-e988-9e36-e574ca0e5216",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "getLocations",
+			"request": {
+				"url": "http://localhost:8080/movement/api/v1/vins/asd/sessions/123/locations",
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "postLocation",
+			"request": {
+				"url": "http://localhost:8080/movement/api/v1/vins/asdf/sessions/1234/locations",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"timestamp\" : 1532274465,\n\t\"latitude\" : 1.1,\n\t\"longitude\" : 1.2,\n\t\"heading\" : 190\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "getAllSessions",
+			"request": {
+				"url": "http://localhost:8080/movement/api/v1/vins/asd/sessions",
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "getAllVehicles",
+			"request": {
+				"url": "http://localhost:8080/movement/api/v1/vins",
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "getPosition",
+			"request": {
+				"url": "http://localhost:8080/movement/api/v1/vins/7339J09NGN56IMG/position",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "createJWT - allRoles",
+			"request": {
+				"url": "http://localhost:8080/movement/api/interim/auth/allroles",
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"description": ""
+			},
+			"response": []
+		}
+	]
+}

@@ -1,0 +1,124 @@
+plugins {
+//    id 'io.franzbecker.gradle-lombok' version '1.14'
+    id 'com.benjaminsproule.swagger' version '1.0.0'
+    id 'net.ltgt.apt' version '0.8'
+    id 'java'
+}
+
+group 'com.bmw.location'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'war'
+apply plugin: 'idea'
+apply plugin: 'com.benjaminsproule.swagger'
+
+project.tasks['war'].dependsOn('generateSwaggerDocumentation')
+
+tasks.withType(JavaCompile) {
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
+    options.encoding = 'UTF-8'
+}
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+
+dependencies {
+    testCompile 'fi.testee:testeefi-junit5-all:0.6.1'
+
+    providedCompile 'fish.payara.extras:payara-micro:4.1.2.181'
+    providedCompile 'org.eclipse.microprofile:microprofile:1.2'
+    providedCompile 'org.eclipse.microprofile.jwt:microprofile-jwt-auth-api:1.0'
+    providedCompile 'javax:javaee-api:7.0'
+
+    compile 'org.slf4j:slf4j-api:1.7.25'
+    compile 'ch.qos.logback:logback-classic:1.1.7'
+    compile 'io.swagger:swagger-annotations:1.5.15'
+    compile 'org.mapstruct:mapstruct-jdk8:1.2.0.Final'
+    compile 'com.nimbusds:nimbus-jose-jwt:5.1'
+
+    compileOnly 'org.projectlombok:lombok:1.18.0'
+
+    apt 'org.mapstruct:mapstruct-processor:1.2.0.Final'
+    apt "org.projectlombok:lombok:1.18.0"
+}
+
+war {
+    baseName = 'movement'
+    archiveName = 'movement.war'
+    exclude "swagger"
+    from("${buildDir}/swagger", {
+        into 'swagger'
+    })
+}
+
+task runMicro(type: Exec, dependsOn: war) {
+    def payaraJarPath = configurations
+            .providedCompile
+            .find { it.name =~ /payara-micro.*\.jar/ }
+            .absolutePath
+    def warFile = war.archivePath
+    commandLine('java', '-jar', payaraJarPath, '--deploy', warFile)
+}
+task initTestData(type: MovementDataParser) {
+    url = "http://localhost:8080/${war.baseName}/api/v1/vins/{vin}/sessions/{session}/locations"
+}
+
+swagger {
+    apiSource {
+        springmvc = false
+        locations = ['com.bmw.location.movementtracker.web']
+        schemes = ['http']
+        host = 'localhost:8080'
+        basePath = '/api'
+        info {
+            title = 'Movement Tracker'
+            version = 'v1'
+            description = 'Tracks movement sessions of different vehicles.'
+            contact {
+                email = 'mail@roblang.de'
+                name = 'Robert Lang'
+            }
+            license {
+                url = 'http://www.apache.org/licenses/LICENSE-2.0.html'
+                name = 'Apache 2.0'
+            }
+        }
+        swaggerDirectory = "${project.buildDir}/generated/swagger-ui"
+        attachSwaggerArtifact = false
+        templatePath = "${project.rootDir}//api-doc-template/strapdown.html.hbs"
+        outputPath = "${project.buildDir}/swagger/index.html"
+    }
+}
+
+class MovementDataParser extends DefaultTask {
+    String url
+
+    @TaskAction
+    void parse() {
+        def data = new File("data.csv")
+        data.eachLine {
+            def split = it.split(",")
+            MovementDataParser.executeCall(url, split[0], split[1], split[2], split[3], split[4], split[5])
+        }
+    }
+
+    private static void executeCall(tmplUrl, timestamp, vin, session, lati, longi, heading) {
+        // parsing logic
+        def url = tmplUrl.replace("{vin}", vin).replace("{session}", session)
+        def post = new URL(url).openConnection();
+        def message = "{\"timestamp\":${timestamp},\"latitude\":${lati},\"longitude\":${longi},\"heading\":${heading}}"
+        post.setRequestMethod("POST")
+        post.setDoOutput(true)
+        post.setRequestProperty("Content-Type", "application/json")
+        post.getOutputStream().write(message.getBytes("UTF-8"));
+        def postRC = post.getResponseCode();
+        if (!postRC.equals(204)) {
+            println("error")
+            println(post.getInputStream().getText());
+        }
+    }
+}
