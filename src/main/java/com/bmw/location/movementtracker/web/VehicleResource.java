@@ -26,7 +26,7 @@ import io.swagger.annotations.ApiOperation;
 @ApplicationScoped
 @Api(description = "Handling static location related service calls regarding a specific vehicle")
 @Produces("application/json")
-@RolesAllowed("vehicle")
+//@RolesAllowed("vehicle")
 @Path("/v1/vins")
 public class VehicleResource {
     @Inject
