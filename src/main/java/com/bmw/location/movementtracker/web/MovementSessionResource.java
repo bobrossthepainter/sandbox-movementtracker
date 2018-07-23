@@ -37,7 +37,7 @@ public class MovementSessionResource {
 
     @GET
     @Path("/position")
-    @RolesAllowed("nsa")
+    //@RolesAllowed("nsa")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(
             value = "Returns the last known location of a vehicle, derived from the last updated session"
